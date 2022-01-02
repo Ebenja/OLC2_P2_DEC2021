@@ -26,6 +26,7 @@ import {
   UncontrolledTooltip,
 } from "reactstrap";
 import React, {useState} from 'react';
+import * as CSV from 'csv-string';
 // import mammoth from "mammoth";
                                    
                           
@@ -35,41 +36,157 @@ import React, {useState} from 'react';
 const Tables = () => {
   const [selectedFile, setSelectedFile] = useState();
 	const [isFilePicked, setIsFilePicked] = useState(false);
+  const [colHeaders, setColHeaders] = useState([]);
+  const [colRepsOptions, setRepsOptions] = useState([]);
+  const [textCsv, settextCsv] = useState("");
+  const [repActual, setrepActual] = useState("");
+  const [headX, setheadX] = useState("");
+  const [headY, setheadY] = useState("");
+  const [busqueda, setSearch] = useState("");
+  const [predict, setPredict] = useState("");
+  const [reports, setReports] = useState([
+    { id: 1, report: "Tendencia de la infección por Covid-19 en un País."},
+    { id: 2, report: "Predicción de Infectados en un País."},
+    { id: 3, report: "Indice de Progresión de la pandemia."},
+    { id: 4, report: "Predicción de mortalidad por COVID en un Departamento."},
+    { id: 5, report: "Predicción de mortalidad por COVID en un País."},
+    { id: 6, report: "Análisis del número de muertes por coronavirus en un País."},
+    { id: 7, report: "Tendencia del número de infectados por día de un País."},
+    { id: 8, report: "Predicción de casos de un país para un año."},
+    { id: 9, report: "Tendencia de la vacunación de en un País."},
+    { id: 10, report: "Ánalisis Comparativo de Vacunaciópn entre 2 paises."},
+    { id: 11, report: "Porcentaje de hombres infectados por covid-19 en un País desde el primer caso activo"},
+    { id: 12, report: "Ánalisis Comparativo entres 2 o más paises o continentes."},
+    { id: 13, report: "Muertes promedio por casos confirmados y edad de covid 19 en un País."},
+    { id: 14, report: "Muertes según regiones de un país - Covid 19."},
+    { id: 15, report: "Tendencia de casos confirmados de Coronavirus en un departamento de un País."},
+    { id: 16, report: "Porcentaje de muertes frente al total de casos en un país, región o continente."},
+    { id: 17, report: "Tasa de comportamiento de casos activos en relación al número de muertes en un continente."},
+    { id: 18, report: "Comportamiento y clasificación de personas infectadas por COVID-19 por municipio en un País."},
+    { id: 19, report: "Predicción de muertes en el último día del primer año de infecciones en un país."},
+    { id: 20, report: "Tasa de crecimiento de casos de COVID-19 en relación con nuevos casos diarios y tasa de muerte por COVID-19"},
+    { id: 21, report: "Predicciones de casos y muertes en todo el mundo - Neural Network MLPRegressor"},
+    { id: 22, report: "Tasa de mortalidad por coronavirus (COVID-19) en un país."},
+    { id: 23, report: "Factores de muerte por COVID-19 en un país."},
+    { id: 24, report: "Comparación entre el número de casos detectados y el número de pruebas de un país."},
+    { id: 25, report: "Predicción de casos confirmados por día"}
+  ]);
+
+
+
   // this.state = {
   //   title: "",
   //   text: ""
   // };
+  let headers ="";
+  let lines="";
+  let delim ="";
+
+  // COLUMNAS ///
+  // const optionCols = this.colHeaders.map(v => (
+  //   <option >{v}</option>
+  // )); 
+
+  //// LOAD SELECT REPORTS ///
+  const reps = reports.map((head)=>{
+    // console.log(head);
+    return (<option   value={head.id}>{`${head.id}. ${head.report}`}</option>)
+  }); 
+
+
+  /// CSV HEADERS ////
+
+  function parseCSV(text) {
+    // Obtenemos las lineas del texto\
+    let text2 = text;
+    
+    let lines = text.replace(/\r/g, '').split('\n');
+       delim = CSV.detect(text);
+    console.log("Delim: " + delim);
+
+    headers = text2.slice(0,text2.indexOf('\n')).split(delim);
+    headers = headers.map((head)=>{
+      head = head.replace(/['"]+/g, '');
+      // console.log(head);
+      return head;
+    });
+    
+    // console.log(headers);
+
+    return lines.map(line => {
+      // Por cada linea obtenemos los valores
+      let values = line.split(delim);
+      return values;
+    });
+  }
+
+  function reverseMatrix(matrix){
+    let output = [];
+    // Por cada fila
+    matrix.forEach((values, row) => {
+      // Vemos los valores y su posicion
+      values.forEach((value, col) => {
+        // Si la posición aún no fue creada
+        if (output[col] === undefined) output[col] = [];
+        output[col][row] = value;
+      });
+    });
+    return output;
+  }
+
 
   const changeHandler = (event) => {
 		setSelectedFile(event.target.files[0]);
 		setIsFilePicked(true);
     
+    
 
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(selectedFile);
-    reader.onload = e => {
-      // this.extractWordRawText(e.target.result);
-      console.log(e.target.result)
+    let file = event.target.files[0];
+    let reader = new FileReader();
+    reader.onload = (event) => {
+      // Cuando el archivo se terminó de cargar
+      
+      let lines = parseCSV(event.target.result);
+      fillSelectFilters();
+      // let output = reverseMatrix(lines);
+      console.log(lines);
     };
+    // Leemos el contenido del archivo seleccionado
+    reader.readAsBinaryString(file);
+    
+
+    // ARREGLO DE HEADER
+
 
     // console.log(reader);
 	};
 
-  // const extractWordRawText = arrayBuffer => {
-  //   mammoth
-  //     .extractRawText({ arrayBuffer })
-  //     .then(result => {
-  //       const text = result.value; // The raw text
-  //       const messages = result.messages; // Please handle messages
-  //       this.setState({ text });
-  //     })
-  //     .done();
-  // };
+  function fillSelectFilters(){
+    console.log("entre");
+    const colHeader = headers.map((head)=>{
+      // console.log(head);
+      return (<option   value={head}>{head}</option>)
+    });
+    
+    setColHeaders(colHeader);
+  }
 
+
+
+
+
+  
 	const handleSubmission = () => {
 		const formData = new FormData();
 
 		formData.append('File', selectedFile);
+    formData.append("repActual", repActual);
+    formData.append("x", headX);
+    formData.append("y", headY);
+    formData.append("search", busqueda);
+    formData.append("predict", predict);
+    
+
 
 		fetch(
 			'https://freeimage.host/api/1/upload?key=<YOUR_API_KEY>',
@@ -86,6 +203,21 @@ const Tables = () => {
 				console.error('Error:', error);
 			});
 	};
+
+  function onDropX(e) {
+      console.log("THE VAL", e.target.value);
+    setheadX(e.target.value);
+      //here you will see the current selected value of the select input
+  }
+  function onDropY(e) {
+    console.log("THE VAL", e.target.value);
+    setheadY(e.target.value);
+  }
+
+  function onDropReport(e) {
+    console.log("THE VAL", e.target.value);
+    setrepActual(e.target.value);
+  }
   
   return (
     <>
@@ -100,13 +232,18 @@ const Tables = () => {
           <div className="col">
           </div>
         </Row>
-        {/* Dark table */}
         <Row>
+          
+        </Row>
+        {/* Dark table */}
+        <Row >
+        <div className="col">
+          
           <Card className="bg-secondary shadow">
               <CardHeader className="bg-white border-0">
                 <Row className="align-items-center">
                   <Col xs="8">
-                    <h3 className="mb-0">My account</h3>
+                    <h3 className="mb-0">Carga CSV</h3>
                   </Col>
                   <Col className="text-right" xs="4">
                     <Button
@@ -121,9 +258,21 @@ const Tables = () => {
                 </Row>
               </CardHeader>
               <CardBody>
+                <FormGroup>
+                  <label
+                    className="form-control-label"
+                    htmlFor="input-X"
+                  >
+                    Report
+                  </label><br></br>
+                  <select class="custom-select   " onChange={onDropReport}  >
+                    <option selected>Select your Column</option>
+                      {reps }
+                  </select>
+                </FormGroup>
                 <Form>
                   <h6 className="heading-small text-muted mb-4">
-                    User information
+                    Filter Information
                   </h6>
                   <div className="pl-lg-4">
                     <Row>
@@ -131,16 +280,48 @@ const Tables = () => {
                         <FormGroup>
                           <label
                             className="form-control-label"
+                            htmlFor="input-X"
+                          >
+                            Header X
+                          </label><br></br>
+                          <select class="custom-select   " onChange={onDropX}  >
+                            <option selected>Select your Column</option>
+                              {colHeaders }
+                          </select>
+                        </FormGroup>
+                      </Col>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-Y"
+                          >
+                            Header Y
+                          </label>
+                          <select class="custom-select   " onChange={onDropY}  >
+                            <option selected>Select your Column</option>
+                              {colHeaders }
+                          </select>
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
                             htmlFor="input-username"
                           >
-                            Username
+                            Filter by:
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="lucky.jesse"
-                            id="input-username"
-                            placeholder="Username"
+                            
+                            id="input-search"
+                            placeholder="Example: Guatemala"
                             type="text"
+                            value={busqueda}
+                            required
                           />
                         </FormGroup>
                       </Col>
@@ -150,17 +331,20 @@ const Tables = () => {
                             className="form-control-label"
                             htmlFor="input-email"
                           >
-                            Email address
+                            Predict
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-email"
-                            placeholder="jesse@example.com"
+                            id="input-predict"
+                            placeholder="500"
                             type="email"
+                            value = {predict}
+                            required
                           />
                         </FormGroup>
                       </Col>
                     </Row>
+
                     <Row>
                       <Col lg="6">
                         <FormGroup>
@@ -168,7 +352,7 @@ const Tables = () => {
                             className="form-control-label"
                             htmlFor="input-first-name"
                           >
-                            First name
+                            Data name
                           </label>
                           <Input
                             className="form-control-alternative"
@@ -185,7 +369,7 @@ const Tables = () => {
                             className="form-control-label"
                             htmlFor="input-last-name"
                           >
-                            Last name
+                            Data name
                           </label>
                           <Input
                             className="form-control-alternative"
@@ -201,14 +385,14 @@ const Tables = () => {
                   <hr className="my-4" />
                   {/* Address */}
                   <h6 className="heading-small text-muted mb-4">
-                    Contact information
+                    CSV Information
                   </h6>
                   <div className="pl-lg-4">
 
 
 
                   <div>
-                    <input type="file" name="file" onChange={changeHandler} />
+                    <Input  type="file" name="file" onChange={changeHandler} />
                     {isFilePicked ? (
                       <div>
                         <p>Filename: {selectedFile.name}</p>
@@ -223,7 +407,7 @@ const Tables = () => {
                       <p>Select a file to show details</p>
                     )}
                     <div>
-                      <button onClick={handleSubmission}>Submit</button>
+                      <Button type="button" color="primary" onClick={handleSubmission}>Submit</Button>
                     </div>
                   </div>
 
@@ -234,11 +418,22 @@ const Tables = () => {
                   <hr className="my-4" />
                   {/* Description */}
                   <h6 className="heading-small text-muted mb-4">About me</h6>
+                  <FormGroup>
+                    
+                    {/* <Input
+                      id="exampleText"
+                      name="text"
+                      type="textarea"
+                      value = {textCsv}
+                      rows="10"
+                    /> */}
+                    <textarea class="form-control" value = {textCsv} id="exampleFormControlTextarea1" rows="10"></textarea>
+                  </FormGroup>
                   
                 </Form>
               </CardBody>
             </Card>
-          
+            </div>
         </Row>
 
         <Row className="mt-5">
