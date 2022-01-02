@@ -18,6 +18,7 @@ import {
   Container,
   FormGroup,
   Input,
+  
   Button,
   Col,
   Row,
@@ -27,6 +28,7 @@ import {
 } from "reactstrap";
 import React, {useState} from 'react';
 import * as CSV from 'csv-string';
+import Swal from 'sweetalert2'
 // import mammoth from "mammoth";
                                    
                           
@@ -41,8 +43,10 @@ const Tables = () => {
   const [textCsv, settextCsv] = useState("");
   const [repActual, setrepActual] = useState("");
   const [headX, setheadX] = useState("");
+  const [isDateheadX, setisDateheadX] = useState(false);
   const [headY, setheadY] = useState("");
-  const [busqueda, setSearch] = useState("");
+  const [headFilter, setheadFilter] = useState("");
+  const [search, setSearch] = useState("");
   const [predict, setPredict] = useState("");
   const [reports, setReports] = useState([
     { id: 1, report: "Tendencia de la infección por Covid-19 en un País."},
@@ -81,6 +85,7 @@ const Tables = () => {
   let headers ="";
   let lines="";
   let delim ="";
+  console.log(isDateheadX)
 
   // COLUMNAS ///
   // const optionCols = this.colHeaders.map(v => (
@@ -99,10 +104,12 @@ const Tables = () => {
   function parseCSV(text) {
     // Obtenemos las lineas del texto\
     let text2 = text;
+    settextCsv(text2);
     
     let lines = text.replace(/\r/g, '').split('\n');
-       delim = CSV.detect(text);
+    delim = CSV.detect(text);
     console.log("Delim: " + delim);
+    // console.log(lines);
 
     headers = text2.slice(0,text2.indexOf('\n')).split(delim);
     headers = headers.map((head)=>{
@@ -179,17 +186,19 @@ const Tables = () => {
 	const handleSubmission = () => {
 		const formData = new FormData();
 
-		formData.append('File', selectedFile);
+		formData.append('fileCsv', selectedFile);
     formData.append("repActual", repActual);
     formData.append("x", headX);
+    formData.append("isDateX", isDateheadX);
     formData.append("y", headY);
-    formData.append("search", busqueda);
+    formData.append("headFilter", headFilter);
+    formData.append("search", search);
     formData.append("predict", predict);
     
 
 
 		fetch(
-			'https://freeimage.host/api/1/upload?key=<YOUR_API_KEY>',
+			'http://localhost:5000/rep1',
 			{
 				method: 'POST',
 				body: formData,
@@ -197,10 +206,21 @@ const Tables = () => {
 		)
 			.then((response) => response.json())
 			.then((result) => {
-				console.log('Success:', result);
+				Swal.fire({
+          position: 'top-end',
+          icon: 'success',
+          title: 'Your work has been saved',
+          showConfirmButton: false,
+          timer: 1500
+        })
 			})
 			.catch((error) => {
-				console.error('Error:', error);
+				Swal.fire({
+          title: 'Error!',
+          text: `Do you want to continue ${error}`,
+          icon: 'error',
+          confirmButtonText: 'Cool'
+        })
 			});
 	};
 
@@ -219,6 +239,21 @@ const Tables = () => {
     setrepActual(e.target.value);
   }
   
+  function onDropHeadFilter(e) {
+    console.log("THE VAL", e.target.value);
+    setheadFilter(e.target.value);
+  }
+
+  function onDropNameFilter(e) {
+    console.log("THE VAL", e.target.value);
+    setSearch(e.target.value);
+  }
+
+  const handleOnChangeDateHeadX = () => {
+    setisDateheadX(!isDateheadX);
+    // console.log("isDate: "+ isDateheadX)
+  };
+
   return (
     <>
       {/* <Header /> */}
@@ -288,6 +323,16 @@ const Tables = () => {
                             <option selected>Select your Column</option>
                               {colHeaders }
                           </select>
+                          <div class="form-check mb-2">
+                            <Input class="form-check-input" 
+                              type="checkbox" id="autoSizingCheck" 
+                              checked={isDateheadX}
+                              onChange={handleOnChangeDateHeadX}
+                            />
+                            <label class="form-check-label" for="autoSizingCheck">
+                              Is Date
+                            </label>
+                          </div>
                         </FormGroup>
                       </Col>
                       <Col lg="6">
@@ -314,17 +359,34 @@ const Tables = () => {
                           >
                             Filter by:
                           </label>
+                          <select class="custom-select   " onChange={onDropHeadFilter}  >
+                            <option selected>Select your Column</option>
+                              {colHeaders }
+                          </select>
+                        </FormGroup>
+                      </Col>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-email"
+                          >
+                            Name to Filter
+                          </label>
                           <Input
                             className="form-control-alternative"
-                            
-                            id="input-search"
+                            id="input-nameFilter"
                             placeholder="Example: Guatemala"
                             type="text"
-                            value={busqueda}
-                            required
+                            defaultValue=""
+                            onChange={(event) => {/*search = event.target.value;*/ setSearch(event.target.value);console.log(search);}}
+                            // required
                           />
                         </FormGroup>
                       </Col>
+                    </Row>
+
+                    <Row>
                       <Col lg="6">
                         <FormGroup>
                           <label
@@ -337,29 +399,11 @@ const Tables = () => {
                             className="form-control-alternative"
                             id="input-predict"
                             placeholder="500"
-                            type="email"
-                            value = {predict}
-                            required
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-
-                    <Row>
-                      <Col lg="6">
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-first-name"
-                          >
-                            Data name
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            defaultValue="Lucky"
-                            id="input-first-name"
-                            placeholder="First name"
                             type="text"
+                            value = {predict}
+                            
+                            onChange={(event) => predict = event.target.value}
+                            required
                           />
                         </FormGroup>
                       </Col>
@@ -417,7 +461,7 @@ const Tables = () => {
                   </div>
                   <hr className="my-4" />
                   {/* Description */}
-                  <h6 className="heading-small text-muted mb-4">About me</h6>
+                  <h6 className="heading-small text-muted mb-4">Data of CSV</h6>
                   <FormGroup>
                     
                     {/* <Input
