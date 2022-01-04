@@ -172,8 +172,14 @@ const styles = StyleSheet.create({
   h1: {
     fontSize: 13,
     textAlign: 'center',
-    paddingHorizontal: 90,
-    paddingBottom: 5,
+    paddingBottom: 16,
+    fontFamily: 'Times-Roman',
+    fontWeight: 'bolder'
+  },
+  h2: {
+    fontSize: 12,
+    textAlign: 'center',
+    paddingBottom: 16,
     fontFamily: 'Times-Roman',
     fontWeight: 'bolder'
   },
@@ -185,10 +191,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Times-Roman'
   },
   text: {
-    margin: 10,
+    // margin: 10,
+    paddingBottom: 80,
+    margin: 12,
     fontSize: 10,
     textAlign: 'justify',
     fontFamily: 'Times-Roman',
+    
     
   },
   image: {
@@ -885,14 +894,18 @@ const styles = StyleSheet.create({
                             <View style={[styles.row, { height: 700 }]}>
                               <View style={styles.left}>
                                 <Text style={styles.h1}><b>I. Objetivos</b></Text>
-                                <Text style={styles.text}  >Python es conocido como el lenguaje que logra dominar todas las estadísticas,
-                                relacionadas con la minería de datos e incluso el aprendizaje automático,
-                                  es software libre, por lo que muchas personas han podido usarlo para desarrollar 
-                                  sus soluciones dando un lugar que ha Bibliotecas muy interesantes donde se pueden 
-                                  encontrar casi todas las técnicas de machine learning que existen actualmente, por 
-                                  supuesto, tiene su parte negativa, y es que derivada del hecho de que muchas personas 
-                                  han aportado, tiene su sintaxis específica para cada caso, lo que hace aprendizaje 
-                                  un poco complejo.</Text>
+                                <Text style={styles.h2}><b>A. General</b></Text>
+                                <Text style={styles.text}  >
+                                Aplicar Data Science donde los  conceptos de estadística, matemática y programación,
+                                 entran en vigor con un conjunto de herramientas tecnológicas (ScikitLearn), para extraer información
+                                   de los casos de COVID19 que ha afectado al mundo, utilizando los metodos de regresion polinomial y 
+                                   lineal para determinar las Tendencias y Predicciones de los Casos en las diferentes regiones
+                                </Text>
+                                <br></br>
+                                <Text style={styles.h1}><b>II. Marco Teorico</b></Text>
+                                <Text style={styles.text}  >
+                                El análisis de la regresión lineal se utiliza para predecir el valor de una variable según el valor de otra. La variable que desea predecir se denomina variable dependiente. La variable que está utilizando para predecir el valor de la otra variable se denomina variable independiente.
+                                </Text>
                               </View>
                               <View style={styles.right}>
                                 <Text style={styles.h1}>Buenasssssssssssssssss</Text>

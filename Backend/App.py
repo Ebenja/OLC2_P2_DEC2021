@@ -15,6 +15,7 @@ rmse = 0
 r2 = 0
 image64 = io.BytesIO()
 coefL = 0
+coefReg = 0
 
 app = Flask(__name__)
 CORS (app) # Comment on deploy
@@ -97,6 +98,7 @@ def regrPolinomial(headX, headY, df):
     global r2
     global image64
     global coefL
+    global coefReg
 
     x = np.asarray(df[headX]).reshape(-1, 1)
     y = df[headY]
@@ -133,8 +135,8 @@ def regrPolinomial(headX, headY, df):
 
 
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     # global readEntrada
     # f = open("./entrada.txt", "r")
     # readEntrada = f.read()
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0', port=5000)
