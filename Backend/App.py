@@ -135,7 +135,7 @@ def regrPolinomial(headX, headY, df):
 
 
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     # global readEntrada
     # f = open("./entrada.txt", "r")
     # readEntrada = f.read()
