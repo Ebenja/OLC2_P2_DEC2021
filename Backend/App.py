@@ -1,7 +1,9 @@
+import datetime
 from flask import Flask, render_template, request, url_for, redirect,  jsonify,make_response
 from flask_cors import CORS, cross_origin
 import numpy as np
 import pandas as pd
+from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import mean_squared_error, r2_score
@@ -16,7 +18,7 @@ r2 = 0
 image64 = io.BytesIO()
 coefL = 0
 coefReg = 0
-
+pred = 0
 app = Flask(__name__)
 CORS (app) # Comment on deploy
 # CORS(app, resources={r"/*": {"origins": "*"}})
@@ -36,6 +38,7 @@ def rep1():
     global rmse
     global r2
     global coefL
+    global pred
     fileCsv = None
     repActual=request.form['repActual'] #id
     fileCsv = request.files['fileCsv']
@@ -48,6 +51,7 @@ def rep1():
     # grado=request.form['grado']
     headFilter=request.form['headFilter']
     predict=request.form['predict']
+    predictIsDate=request.form['predictIsDate']
     search=request.form['search']
 
     df = pd.read_csv(fileCsv)
@@ -64,9 +68,52 @@ def rep1():
         if ( isDateX =="true" ):
             print("ES Fecha X")
             df[headX] = pd.DatetimeIndex(df[headX])
-            # df[headX] = df[headX].map(pd.Timestamp.toordinal)
+            # df[headX] = df[headX].index.map(pd.Timestamp.toordinal)
+            # df[headX] = df[headX].index.map(pd.Timestamp.toordinal)
 
-        regrPolinomial(headX, headY,df)
+        if (int(repActual )== 1 or int(repActual )== 7 or int(repActual )== 9 or int(repActual )== 15 ):
+        
+            regrPolinomial(headX, headY,df)
+
+        if (int(repActual )== 2 or int(repActual )== 4 or int(repActual )== 5 or int(repActual )== 8 or int(repActual )== 19 or int(repActual )== 21 or int(repActual )== 25  ):
+            print("isdatePredict")
+            # print(predict)
+            # print(predictIsDate)
+            # print(df)
+            # regrPolinomialpREDICCION(headX, headY,df,predict)
+            x = np.asarray (df[headX]).reshape(-1,1)
+            y = df[headY]
+            regr = linear_model.LinearRegression()
+            regr.fit(x,y)
+            y_pred = regr.predict(x)
+            plt.scatter(x, y, color='black')
+            plt.plot(x, y_pred, color='blue', linewidth=3)
+            # plt.ylim(0,1)
+            # plt.show()
+            print("regresion lineal")
+            coefL=regr.coef_
+            print("predict ")
+            print(regr.predict([[50]]))
+            pred = regr.predict([[predict]])
+
+            s = io.BytesIO()
+    
+            plt.savefig(s, format='png', bbox_inches="tight")
+            plt.close()
+            s = base64.b64encode(s.getvalue()).decode("utf-8").replace("\n", "")
+            image64 ="data:image/png;base64," + s
+
+            # if predictIsDate == "true":
+            #     # datoFehca = pd.DatetimeIndex(predict)
+            #     # fechaaa = datetime.strptime(predict, '%d/%m/%Y')
+            # #  fechaaa.toordinal()
+            #     print()
+           
+                # print(fechaaa.toordinal())
+                # regrPolinomialpREDICCION(headX, headY,df,fechaaa.toordinal())
+            # if predictIsDate == "false":
+            #     regrPolinomialpREDICCION(headX, headY,df,predict)
+
         print(coefL)
         print(r2)
         print(rmse)
@@ -83,7 +130,8 @@ def rep1():
             "image64": json.dumps(image64),
             "rmse": json.dumps(rmse),
             "r2": json.dumps(r2),
-            "coefL": json.dumps(coefL.tolist())
+            "coefL": json.dumps(coefL.tolist()),
+            "pred": json.dumps(pred.tolist()),
         }
         # print(res)
         # return jsonify(res)
@@ -131,11 +179,52 @@ def regrPolinomial(headX, headY, df):
     # print(image64)
 
 
+
+def regrPolinomialpREDICCION(headX, headY, df, datoPred):
+    global rmse
+    global r2
+    global image64
+    global coefL
+    global coefReg
+    global pred
+    # print("entre")
+    # print(headX)
+    # print(headY)
+    x = np.asarray(df[headX]).reshape(-1,1)
+    x_data = df[headX]
+    y = df[headY]
+    # ||||||||||||||    LINEAL  ||||||||||||||
+    regr = linear_model.LinearRegression()
+    # Entrenando el modelo lin
+    regr.fit(x,y)
+
+
+    # regr = linear_model.LinearRegression()
+    # regr.fit(x,y)
+    # y_pred = regr.predict(x)
+    # plt.scatter(x, y, color='black')
+    # plt.plot(x, y_pred, color='blue', linewidth=3)
+    # # plt.ylim(0,1)
+    # # plt.show()
+    # print("regresion lineal")
+    # # print(regr.coef_)
+    # coefL = regr.coef_
+    # # print("predict ")
+    # # print(regr.predict([[2025]]))
+    # pred = regr.predict([[datoPred]])
+    # # print(pred1)
+
+    # s = io.BytesIO()
     
+    # plt.savefig(s, format='png', bbox_inches="tight")
+    # plt.close()
+    # s = base64.b64encode(s.getvalue()).decode("utf-8").replace("\n", "")
+    # image64 ="data:image/png;base64," + s
 
 
 
-if __name__ == "_main_":
+
+if __name__ == "__main__":
     # global readEntrada
     # f = open("./entrada.txt", "r")
     # readEntrada = f.read()

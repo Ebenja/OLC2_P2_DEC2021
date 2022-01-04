@@ -4,6 +4,7 @@ import {
   Badge,
   Card,
   CardHeader,
+  CardTitle,
   CardFooter,
   DropdownMenu,
   DropdownItem,
@@ -30,7 +31,7 @@ import React, {useState} from 'react';
 import * as CSV from 'csv-string';
 import Swal from 'sweetalert2'
 import  {services}  from '../../services/services.js';
-import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { PDFViewer, Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 // import mammoth from "mammoth";
                                    
                           
@@ -43,11 +44,15 @@ const Tables = () => {
   const [colHeaders, setColHeaders] = useState([]);
   const [colRepsOptions, setRepsOptions] = useState([]);
   const [textCsv, settextCsv] = useState("");
+
+  const [bandPrediccion, setbandPrediccion] = useState(false);
   // Reportes
   const [repActual, setrepActual] = useState("");
   const [repActualTitle, setrepActualTitle] = useState("");
   const [descRepActual, setdescRepActual] = useState("");
   const [instrRepActual, setinstrRepActual] = useState("");
+  const [imageActual, setimageActual] = useState("");
+  // let imageActual; 
 
   const [headX, setheadX] = useState("");
   const [isDateheadX, setisDateheadX] = useState(false);
@@ -55,6 +60,7 @@ const Tables = () => {
   const [headFilter, setheadFilter] = useState("");
   const [search, setSearch] = useState("");
   const [predict, setPredict] = useState("");
+  const [predictIsDate, setpredictIsDate] = useState(false);
   const [reports, setReports] = useState([
     { id: 1, report: "Tendencia de la infección por Covid-19 en un País.", completed: true},
     { id: 2, report: "Predicción de Infectados en un País.",completed: false},
@@ -85,15 +91,14 @@ const Tables = () => {
 
   const [instr, setInstr] = useState( [
     {id: 1, reportDesc:"1. Seleccione  Variable Independiente X (Ya sea Fecha, o una Susesion de numero)\n2.Seleccione El NO CASOS como variable Dependiente Y\n3.Seleccione el Filtro Pais, y el Pais que va a FIltrar",},
-    {id: 2, reportDesc:"1.  \n2. "},
-    {id: 2, reportDesc:"1.  \n2. "},
+    {id: 2, reportDesc:"1. Selecccione #Infectados como vaiable Y y como Variable X, los #Dias, Luego Filtre por pais \n2.  Ingrese Dato a Predecir"},
     {id: 3, reportDesc:"1.  \n2. "},
-    {id: 4, reportDesc:"1.  \n2. "},
-    {id: 5, reportDesc:"1.  \n2. "},
+    {id: 4, reportDesc:"1. Se Selecciona como variable independiente X= #DIAS y como depndendientes Y=#CasosMortales \n2. Se seleccion #DEPARTAMENTO Ingrese Dato a Predecir"},
+    {id: 5, reportDesc:"1. Se Selecciona como variable independiente X= #DIAS y como depndendientes Y=#CasosMortales \n2. Se seleccion #PAIS Ingrese Dato a Predecir"},
     {id: 6, reportDesc:"1.  \n2. "},
     {id: 7, reportDesc:"1. Seleccione  Variable Independiente X Fechha, y si es de tipo Date Seleccione en CheckBox\n2.Seleccione El NO CASOS como variable Dependiente Y\n3.Seleccione el Filtro Pais, y el Pais que va a Filtrar"},
-    {id: 8, reportDesc:"1.  \n2. "},
-    {id: 9, reportDesc:"1. Seleccione  Variable Independiente X (Ya sea Fecha, o una Susesion de numero), y si es de tipo Date Seleccione en CheckBox\n2.Seleccione El #NO VACUNAS como variable Dependiente Y\n3.Seleccione el Filtro Pais, y el Pais que va a Filtrar"},
+    {id: 8, reportDesc:"1. InDependiente X => Año  \n2. Dependiente Y=> Casos, \n3. Se selecciono el Pais \n Ingrese Dato a Predecir"},
+    {id: 9, reportDesc:"1. Seleccione  Variable Independiente X (Ya sea Fecha, o una Susesion de numero), y si es de tipo Date Seleccione en CheckBox\n2.Seleccione El #NO VACUNAS como variable Dependiente Y\n3.Seleccione el Filtro DEPARTAMENTO, y el Pais que va a Filtrar"},
     {id: 10, reportDesc:"1.  \n2. "},
     {id: 11, reportDesc:"1.  \n2. "},
     {id: 12, reportDesc:"1.  \n2. "},
@@ -103,25 +108,25 @@ const Tables = () => {
     {id: 16, reportDesc:"1.  \n2. "},
     {id: 17, reportDesc:"1.  \n2. "},
     {id: 18, reportDesc:"1.  \n2. "},
-    {id: 19, reportDesc:"1.  \n2. "},
+    {id: 19, reportDesc:"1.Variable X=> Fechas  \n2.Variable Y=> Muertes \n 3.Seleccion de Pais \n 4. Ingrese Dato a Predecir"},
     {id: 20, reportDesc:"1.  \n2. "},
-    {id: 21, reportDesc:"1.  \n2. "},
+    {id: 21, reportDesc:"1. Seleccione en X=> Casos \n2. Seleccione en Y=> Muertes \n 3. no Aplique filtro \n 4. Ingrese Dato a Predecir"},
     {id: 22, reportDesc:"1.  \n2. "},
     {id: 23, reportDesc:"1.  \n2. "},
     {id: 24, reportDesc:"1.  \n2. "},
-    {id: 25, reportDesc:"1.  \n2. "},
+    {id: 25, reportDesc:"1. Seleccione Variable Independiente X=>Dias(Fecha o Numero)  \n2. Seleccione Y=>Casos Confirmados \n 3.No se selecciona filtros \n 4. Ingrese Dato a Predecir"},
 ]);
 
 const [descReport, setdescReport] = useState([
   {id: 1, reportDesc:"La tendencia en infeccion de un Pais puede verse representado por un modelo Polinomial el cual, se grafico utilizando las herramientas de ScikitLearn, Donde podemos observa el modelo Polinomial asi como sus Coeficientes a Continuacion."},
-  {id: 2, reportDesc:""},
-  {id: 2, reportDesc:"1.  \n2. "},
+  {id: 2, reportDesc:"La PREDICCION De infecciones de un Pais, se representa por un modelo Polinomial con el cual, se llego a determinar el valor representado, en el area de resultados,  se grafico utilizando las herramientas de ScikitLearn, Donde podemos observa el modelo Polinomial asi como sus Coeficientes a Continuacion."},
+  {id: 2, reportDesc:"Seleccionando el Departamento a Filtrar se realiza una seleccion utilizando Pandas, Luego se obtiene la Regresion Lineal y Polinomial con la cual se obtiene la ecuacio con sus coeficientes que mas adelante mostraran los datos de la prediccion. "},
   {id: 3, reportDesc:"1.  \n2. "},
-  {id: 4, reportDesc:"1.  \n2. "},
-  {id: 5, reportDesc:"1.  \n2. "},
+  {id: 4, reportDesc:"Seleccionando el PAIS a Filtrar se realiza una seleccion utilizando Pandas, Luego se obtiene la Regresion Lineal y Polinomial con la cual se obtiene la ecuacio con sus coeficientes que mas adelante mostraran los datos de la prediccion."},
+  {id: 5, reportDesc:"Seleccionando el DEPARTAMENTO a Filtrar se realiza una seleccion utilizando Pandas, Luego se obtiene la Regresion Lineal y Polinomial con la cual se obtiene la ecuacio con sus coeficientes que mas adelante mostraran los datos de la prediccion."},
   {id: 6, reportDesc:"1.  \n2. "},
   {id: 7, reportDesc:"Al analizar el numero de Infectados por un Pais, se analizaron tanto #Dias como la cantidad de #Casos positivos. El cual fueron filtrados por #Pais, y aplicados con una regresion lineal y una funcion Polinomial, el cual por el comportamiento que representa puede mostrarse como una recta desde nuestro punto de vista, pero al acercarnos en sus puntos se tienen fluctuaciones ya que es una regresion polinomial"},
-  {id: 8, reportDesc:"1.  \n2. "},
+  {id: 8, reportDesc:"1. InDependiente X => Año  \n2. Dependiente Y=> Casos, \n3. Se selecciono el Pais"},
   {id: 9, reportDesc:"La tendencia de Vacunacion por Pais, se calculo tomando en cuenta las variables Independiente en X como #sucesionDias, y como Dependiente el numero de #vacunados, para lo cual se aplico un filtro por #Pais, Con lo cual con R2, podemos obesrvar lo cercano que es nuestro resultado a lo aceptable"},
   {id: 10, reportDesc:"1.  \n2. "},
   {id: 11, reportDesc:"1.  \n2. "},
@@ -132,9 +137,37 @@ const [descReport, setdescReport] = useState([
   {id: 16, reportDesc:"1.  \n2. "},
   {id: 17, reportDesc:"1.  \n2. "},
   {id: 18, reportDesc:"1.  \n2. "},
-  {id: 19, reportDesc:"1.  \n2. "},
+  {id: 19, reportDesc:"Predicción de muertes en el último día del primer año de infecciones en un país, con lo cual se selecciono el dia, en el determinado pais para obtener dicho resultado en una regresion polinomial de grado 10"},
   {id: 20, reportDesc:"1.  \n2. "},
-  {id: 21, reportDesc:"1.  \n2. "},
+  {id: 21, reportDesc:"Se grafica la dependencia del numero de Muertes con la cantidad de casos en el mundo ya que poseeen una dependencia, donde X es el numero de Casos, y en Y son los numeros de Muertes en el Mundo"},
+  {id: 22, reportDesc:"1.  \n2. "},
+  {id: 23, reportDesc:"1.  \n2. "},
+  {id: 24, reportDesc:"1.  \n2. "},
+  {id: 25, reportDesc:"Se seleccionan el numero de Casos Confirmados por dia, asi como el dato a predecir para obtenerlo en el area de resultados "},
+])
+
+const [concReport, setconcReport] = useState([
+  {id: 1, reportDesc:"La tendencia en infeccion de un Pais puede verse representado por un modelo Polinomial el cual,  Donde podemos observa el modelo Polinomial asi como sus Coeficientes."},
+  {id: 2, reportDesc:"Se calculo la prediccion de Infectados para el dato indicado durante esta fase, utilizando el filtro de Paises, asi como los casos por dias o fecha seleccionado para los ejes, y el grado de confianza nos los da r2."},
+  {id: 3, reportDesc:"1.  \n2. "},
+  {id: 4, reportDesc:"Predicción de mortalidad por COVID en un Departamento,se obtuvo  la Regresion Lineal y Polinomial con la cual se obtiene la ecuacio con sus coeficientes que mas adelante mostraran los datos de la prediccion. Lo cual se puede corroborar con r2"},
+  {id: 5, reportDesc:"Predicción de mortalidad por COVID en un Pais, se obtuvo la Regresion Lineal y Polinomial con la cual se obtiene la ecuacio con sus coeficientes que mas adelante mostraran los datos de la prediccion.Corroborado de que tan aceptable es con r2"},
+  {id: 6, reportDesc:"1.  \n2. "},
+  {id: 7, reportDesc:"Se analizaron tanto #Dias como la cantidad de #Casos positivos. El cual fueron filtrados por #Pais, y aplicados con una regresion lineal y una funcion Polinomial, el cual por el comportamiento que representa puede mostrarse como una recta desde nuestro punto de vista, pero al acercarnos en sus puntos se tienen fluctuaciones ya que es una regresion polinomial"},
+  {id: 8, reportDesc:"Se determino la prediccion, de casos para el pais seleccionado utilizando la regresion polinomial, con lo cual podemos obtener los valores que se pudieron observar en resultados, mas r2 que nos indica de que tan cercano y acertado fue con grado 10 dicha prueba"},
+  {id: 9, reportDesc:"Las variables Independiente en X como #sucesionDias, y como Dependiente el numero de #vacunados, para lo cual se aplico un filtro por #Pais, Con lo cual con R2, podemos obesrvar lo cercano que es nuestro resultado a lo aceptable"},
+  {id: 10, reportDesc:"1.  \n2. "},
+  {id: 11, reportDesc:"1.  \n2. "},
+  {id: 12, reportDesc:"1.  \n2. "},
+  {id: 13, reportDesc:"1.  \n2. "},
+  {id: 14, reportDesc:"1.  \n2. "},
+  {id: 15, reportDesc:"Se realizo un filtro de #Departamento por #Pais con lo cual se tiene los datos necesarios para analizar, Luego se utilizo como variable Independiente X, #Dias_Progresion, y como variable Dependiente Y: #Casos Confirmados"},
+  {id: 16, reportDesc:"1.  \n2. "},
+  {id: 17, reportDesc:"1.  \n2. "},
+  {id: 18, reportDesc:"1.  \n2. "},
+  {id: 19, reportDesc:"Predicciones de casos y muertes en todo el mundo, dando como resultado "},
+  {id: 20, reportDesc:"1.  \n2. "},
+  {id: 21, reportDesc:"Al comparar casos y muertes en una misma grafica obtenemos la prediccion de muertes al estar alcanzando determinada cantidad de casos, avalado por r2 que nos da la confianza de este caso"},
   {id: 22, reportDesc:"1.  \n2. "},
   {id: 23, reportDesc:"1.  \n2. "},
   {id: 24, reportDesc:"1.  \n2. "},
@@ -144,7 +177,7 @@ const [descReport, setdescReport] = useState([
 const styles = StyleSheet.create({
   body: {
     paddingTop: 35,
-    paddingBottom: 65,
+    paddingBottom: 10,
     paddingHorizontal: 35,
   },
   title: {
@@ -178,30 +211,45 @@ const styles = StyleSheet.create({
   },
   h2: {
     fontSize: 12,
+    paddingTop: 15,
+    textAlign: 'center',
+    paddingBottom: 16,
+    fontFamily: 'Times-Roman',
+    fontWeight: 'bolder'
+  },
+  h3: {
+    fontSize: 10,
+    paddingTop: 15,
     textAlign: 'center',
     paddingBottom: 16,
     fontFamily: 'Times-Roman',
     fontWeight: 'bolder'
   },
 
-
   subtitle: {
     fontSize: 8,
     textAlign: 'center',
-    fontFamily: 'Times-Roman'
+    fontFamily: 'Times-Roman',
+    fontStyle: 'italic'
   },
   text: {
     // margin: 10,
-    paddingBottom: 80,
+    paddingBottom: 85,
     margin: 12,
     fontSize: 10,
     textAlign: 'justify',
     fontFamily: 'Times-Roman',
-    
-    
+  },
+  text2: {
+    // margin: 10,
+    paddingBottom: 55,
+    margin: 12,
+    fontSize: 10,
+    textAlign: 'justify',
+    fontFamily: 'Times-Roman',
   },
   image: {
-    marginVertical: 15,
+    marginVertical: 100,
     marginHorizontal: 100,
   },
   header: {
@@ -245,7 +293,8 @@ const styles = StyleSheet.create({
     image64: "",
     rmse: 0,
     r2:0,
-    coefL: []
+    coefL: [],
+    pred: 0,
   });
   const [tableCoefs, settableCoefs] = useState("");
 
@@ -401,11 +450,12 @@ const styles = StyleSheet.create({
     formData.append("headFilter", headFilter);
     formData.append("search", search);
     formData.append("predict", predict);
+    formData.append("predictIsDate", predictIsDate);
     
 
 
 		fetch(
-			'http://localhost:5000/rep1',
+			'http://34.125.141.146:5000/rep1',
 			{
 				method: 'POST',
 				body: formData,
@@ -424,13 +474,14 @@ const styles = StyleSheet.create({
         const data = isJson && await result.json();
         console.log(data);
         setimagenRep1({
-          image64: data.image64.replace(/['"]+/g, ''),
-          // image64: data.image64,
+          // image64: data.image64.replace(/['"]+/g, ''),
+          image64: JSON.parse(data.image64),
           rmse: data.rmse,
           r2:data.r2,
-          coefL: JSON.parse(data.coefL)
+          coefL: JSON.parse(data.coefL),
+          pred: JSON.parse(data.pred),
         });
-
+        setimageActual(JSON.parse(data.image64));
         localStorage.setItem('currentData', JSON.stringify(data))
         
         console.log(imagenRep1)
@@ -464,6 +515,8 @@ const styles = StyleSheet.create({
   }
 
   function onDropReport(e) {
+
+    setbandPrediccion(false);
     console.log("THE VAL");
     console.log(e.target.value);
    
@@ -494,6 +547,29 @@ const styles = StyleSheet.create({
       }
     });
 
+    console.log(typeof(e.target.value));
+
+    if (e.target.value=="1" || e.target.value=="7" || e.target.value=="9" || e.target.value=="15" )
+    {
+      setbandPrediccion(false);
+      setbandPrediccion(false);
+    }
+    
+    // if (repActual==1 || repActual==7 || repActual==9 || repActual==15 )
+    // {
+    //   setbandPrediccion(false);
+    // }
+
+    // Habilitando Prediccion
+    // if (repActual == 2 || repActual == 2 || repActual == 4 || repActual == 5 || repActual == 8 || repActual == 19 || repActual == 21 || repActual == 25  )
+    // {
+    //   console.log("entre2")
+    //   setbandPrediccion(true);
+    // }
+    if (e.target.value == 2 || e.target.value == 2 || e.target.value == 4 || e.target.value == 5   || e.target.value == 8 || e.target.value == 19 || e.target.value == 21 || e.target.value == 25  )
+    {
+      setbandPrediccion(true);
+    }
     
     // console.log(result)
     
@@ -505,6 +581,51 @@ const styles = StyleSheet.create({
     let rmse =data.rmse
     console.log(data.r2);
     return(<h2 className="display-2 text-white mb-0">{`ERROR: ${rmse} R2: ${r2}`}</h2>)
+  }
+
+  function getDatosPdf(){
+    let data= JSON.parse(localStorage.getItem('currentData'))
+    let r2 =data.r2
+    let rmse =data.rmse
+    console.log(data.r2);
+    // return(<h2 className="display-2 text-white mb-0">{`ERROR: ${rmse} R2: ${r2}`}</h2>)
+    return(<Text style={styles.h2}> 
+      {`ERROR: ${rmse} R2: ${r2}`}
+      {headY}
+     </Text>)
+  }
+  function getDatosPdf(){
+    let data= JSON.parse(localStorage.getItem('currentData'))
+    let r2 =data.r2
+    let rmse =data.rmse
+    console.log(data.r2);
+    // return(<h2 className="display-2 text-white mb-0">{`ERROR: ${rmse} R2: ${r2}`}</h2>)
+    return(<Text style={styles.h3}> 
+      {`ERROR: ${rmse} R2: ${r2}`}
+      {headY}
+     </Text>)
+  }
+  function getDatosCoefPdf(){
+    let data= JSON.parse(localStorage.getItem('currentData'))
+    let r2 =data.r2
+    let rmse =data.rmse
+    let contador = -1;
+    // return(<h2 className="display-2 text-white mb-0">{`ERROR: ${rmse} R2: ${r2}`}</h2>)
+    const ts = imagenRep1.coefL.map((head)=>{
+
+      
+
+      if (contador == -1)
+      {
+        contador = contador + 1;
+        return (<Text style={styles.h3}> {head} X^0 </Text>)
+      }
+      contador = contador + 1;
+      return (<Text style={styles.h3}> {head} X^{contador} </Text>)
+      
+      
+    });
+    return ts;
   }
   
   function onDropHeadFilter(e) {
@@ -521,12 +642,16 @@ const styles = StyleSheet.create({
     setisDateheadX(!isDateheadX);
     // console.log("isDate: "+ isDateheadX)
   };
+  const handleOnChangePredictIsDate = () => {
+    setpredictIsDate(!predictIsDate);
+    // console.log("isDate: "+ isDateheadX)
+  };
 
-  function genPdf()
+  function genPdfData()
   {
-    const docPdf = (<Document>
+    // const docPdf = (
 
-    </Document>)
+    // )
   }
 
   
@@ -705,7 +830,8 @@ const styles = StyleSheet.create({
 
                     <Row>
                       <Col lg="6">
-                        <FormGroup>
+                        {bandPrediccion == true ? 
+                          <FormGroup>
                           <label
                             className="form-control-label"
                             htmlFor="input-email"
@@ -717,12 +843,25 @@ const styles = StyleSheet.create({
                             id="input-predict"
                             placeholder="500"
                             type="text"
-                            value = {predict}
-                            
-                            onChange={(event) => predict = event.target.value}
+                            defaultValue=""
+                            onChange={(event) => {setPredict(event.target.value)}}
                             required
                           />
+                          <div class="form-check mb-2">
+                            <Input class="form-check-input" 
+                              type="checkbox" id="autoSizingCheck" 
+                              checked={predictIsDate}
+                              onChange={handleOnChangePredictIsDate}
+                            />
+                            <label class="form-check-label" for="autoSizingCheck">
+                              Is Date
+                            </label>
+                          </div>
                         </FormGroup>
+                        :
+                        <FormGroup></FormGroup>
+                        }
+                        
                       </Col>
                       <Col lg="6">
                         <FormGroup>
@@ -839,6 +978,43 @@ const styles = StyleSheet.create({
                   </Card>
                 </Col>
               </Row>
+              <br></br>
+              <Row>
+                {bandPrediccion == true ?
+                  <Col class="col">
+                  <Card className="card-stats mb-4 mb-xl-0">
+                    <CardBody>
+                      <Row>
+                        <div className="col">
+                          <CardTitle
+                            tag="h5"
+                            className="text-uppercase text-muted mb-0"
+                          >
+                            PREDICCION
+                          </CardTitle>
+                          <span className="h2 font-weight-bold mb-0">
+                            {imagenRep1.pred}
+                          </span>
+                        </div>
+                        <Col className="col-auto">
+                          <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
+                            <i className="fas fa-chart-bar" />
+                          </div>
+                        </Col>
+                      </Row>
+                      <p className="mt-3 mb-0 text-muted text-sm">
+                        <span className="text-success mr-2">
+                          <i className="fa fa-arrow-up" /> 
+                        </span>{" "}
+                        <span className="text-nowrap">{headY}</span>
+                      </p>
+                    </CardBody>
+                  </Card>
+                </Col>
+                :
+                  <Col></Col>
+                }
+              </Row>
 
             </CardBody>
           </Card>
@@ -852,7 +1028,7 @@ const styles = StyleSheet.create({
         <Row className="mt-5">
         <div className="col">
           {
-            repActual!= "" ? <Card className="bg-default shadow">
+            imageActual.length > 0? <Card className="bg-default shadow">
             <CardHeader className="bg-transparent border-0">
               <h1 className="text-white mb-0">Report PDF Results</h1>
               {/* <h2 className="display-2 text-white mb-0">{`${repActual}.${repActualTitle}`}</h2>
@@ -871,7 +1047,7 @@ const styles = StyleSheet.create({
               {/* <Row className="mt-5"> */}
               {/* <div className="col"> */}
               {/* <Row className="mt-5"> */}
-                <PDFViewer className="col"  height='700'
+                <PDFViewer className="col"  height='1300'
                   showToolbar="true" >
                   <Document>
                     <Page style={styles.body}>
@@ -891,7 +1067,7 @@ const styles = StyleSheet.create({
                           han aportado, tiene su sintaxis específica para cada caso, lo que hace aprendizaje 
                           un poco complejo.</Text>
                           <View style="container">
-                            <View style={[styles.row, { height: 700 }]}>
+                            <View style={[styles.row, { height: 600 }]}>
                               <View style={styles.left}>
                                 <Text style={styles.h1}><b>I. Objetivos</b></Text>
                                 <Text style={styles.h2}><b>A. General</b></Text>
@@ -903,23 +1079,68 @@ const styles = StyleSheet.create({
                                 </Text>
                                 <br></br>
                                 <Text style={styles.h1}><b>II. Marco Teorico</b></Text>
-                                <Text style={styles.text}  >
+                                <Text style={styles.h2}><b>Regresion Lineal</b></Text>
+                                <Text style={styles.text2}  >
                                 El análisis de la regresión lineal se utiliza para predecir el valor de una variable según el valor de otra. La variable que desea predecir se denomina variable dependiente. La variable que está utilizando para predecir el valor de la otra variable se denomina variable independiente.
                                 </Text>
+                                <Text style={styles.h2}> 
+                                Y = α +bX
+                                </Text>
+                                <Text style={styles.h2}><b>Regresion Polinomial</b></Text>
+                                <Text style={styles.text}> 
+                                  La Regresión Polinomial es un caso especial de la Regresión Lineal, extiende el modelo lineal al agregar predictores adicionales, obtenidos al elevar cada uno de los predictores originales a una potencia. Por ejemplo, una regresión cúbica utiliza tres variables, como predictores. Este enfoque proporciona una forma sencilla de proporcionar un ajuste no lineal a los datos.
+                                  
+                                  El método estándar para extender la Regresión Lineal a una relación no lineal entre las variables dependientes e independientes, ha sido reemplazar el modelo lineal con una función polinomial.
+                                </Text>
+                                <Text style={styles.h2}> 
+                                  y = Bo + B1x + B2x^2 + Bz^3 + . ..+ Bn^n
+                                </Text>
+
                               </View>
                               <View style={styles.right}>
-                                <Text style={styles.h1}>Buenasssssssssssssssss</Text>
+                                <Text style={styles.h1}>III. Diseño Experimental</Text>
+                                <Text style={styles.text2}> 
+                                  {descRepActual}
+                                </Text>
+                                <Text style={styles.h2}> 
+                                - Variable Independiente X:
+                                 {headX}
+                                </Text>
+                                <Text style={styles.h2}> 
+                                 - Variable Dependiente Y:
+                                 {headY}
+                                </Text>
+
+                                <Text style={styles.h1}>IV. Resultados</Text>
+                                
+                                {getDatosPdf()}
+                                <Text style={styles.h2}> 
+                                Coeficientes
+                                </Text>
+                                {getDatosCoefPdf()}
+                                <Text style={styles.text}> 
+                                  
+                                </Text>
                               </View>
                             </View>
-                          
+                            
                           </View>
+                          
                         
+                      </Page>
+                      <Page style={styles.body}>
+                      <Text style={styles.h1}> Anexos: Grafica de Regresion</Text>
+                              <Image
+                                src={imageActual}
+                                fixed={true}
+                              ></Image>
                       </Page>
                   </Document>
                 </PDFViewer>
                 {/* </Row> */}
               {/* </div> */}
               {/* </Row>  */}
+              
 
             </CardBody>
           </Card>
