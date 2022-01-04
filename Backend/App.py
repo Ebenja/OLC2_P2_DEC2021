@@ -59,6 +59,8 @@ def rep1():
     df.info
     print("Es Fecha")
     print(isDateX)
+    fechaOriginal = []
+    fechaO = []
     
     try:
         if (  not (len(headFilter) == 0  and len(search)==0)  ):
@@ -68,39 +70,51 @@ def rep1():
         
         if ( isDateX =="true" ):
             print("ES Fecha X")
+            print(headX)
             df[headX] = pd.DatetimeIndex(df[headX])
-            # df[headX] = df[headX].index.map(pd.Timestamp.toordinal)
-            # df[headX] = df[headX].index.map(pd.Timestamp.toordinal)
+            # fechaO = pd.DatetimeIndex(df[headX])
+            # fechaOriginal = df[headX].astype('category').cat.codes
 
         print(int(repActual))
 
         if (int(repActual )== 2 or int(repActual )== 4 or int(repActual )== 5 or int(repActual )== 8 or int(repActual )== 19 or int(repActual )== 21 or int(repActual )== 25  ):
             print("isdatePredict")
-            # print(predict)
-            # print(predictIsDate)
-            # print(df)
-            # regrPolinomialpREDICCION(headX, headY,df,predict)
-            x = np.asarray (df[headX]).reshape(-1,1)
-            y = df[headY]
-            regr = linear_model.LinearRegression()
-            regr.fit(x,y)
-            y_pred = regr.predict(x)
-            plt.scatter(x, y, color='black')
-            plt.plot(x, y_pred, color='blue', linewidth=3)
-            # plt.ylim(0,1)
-            # plt.show()
-            print("regresion lineal")
-            coefL=regr.coef_
-            print("predict ")
-            print(regr.predict([[50]]))
-            pred = regr.predict([[predict]])
+            # regrPolinomial(headX, headY,df)
+            regrPolinomialpREDICCION(headX, headY, df, predict)
+            # x= np.asarray(df[headX] ).reshape(-1, 1)
+            # y = df[headY]
+            
+            # regr = LinearRegression()
+            # regr.fit(x,y)
+            # print("predict ")
+            # print(fechaO)
+            # y_pred = regr.predict(x)
+            
+            # plt.scatter(fechaO, y, color='black')
+            # plt.plot(fechaO, y_pred, color='blue', linewidth=3)
+            # # plt.ylim(0,1)
+            # # plt.show()
+            # print("regresion lineal")
+            # coefL=regr.coef_
+            
+            # # print(regr.predict([[50]]))
+            # # 
 
-            s = io.BytesIO()
+
+            # # ultimo =  df[headX].len()
+            # # datoUltimo = df[headX][-1]
+            # # xx[date] = xx[date].astype('category').cat.codes
+            # if (isinstance(predict, datetime.datetime)):
+            #     print("aquiiii")
+            #     predict = predict.astype('category').cat.codes
+            # pred = regr.predict([[predict]])
+
+            # s = io.BytesIO()
     
-            plt.savefig(s, format='png', bbox_inches="tight")
-            plt.close()
-            s = base64.b64encode(s.getvalue()).decode("utf-8").replace("\n", "")
-            image64 ="data:image/png;base64," + s
+            # plt.savefig(s, format='png', bbox_inches="tight")
+            # plt.close()
+            # s = base64.b64encode(s.getvalue()).decode("utf-8").replace("\n", "")
+            # image64 ="data:image/png;base64," + s
 
             # if predictIsDate == "true":
             #     # datoFehca = pd.DatetimeIndex(predict)
@@ -113,7 +127,7 @@ def rep1():
             # if predictIsDate == "false":
             #     regrPolinomialpREDICCION(headX, headY,df,predict)
         if (int(repActual )== 1 or int(repActual )== 7 or int(repActual )== 9 or int(repActual )== 15 or int(repActual )== 3 or int(repActual )== 6 or int(repActual )== 7 or int(repActual )== 15   ):
-        
+            print("entre polinomial")
             regrPolinomial(headX, headY,df)
 
         print(coefL)
@@ -193,39 +207,62 @@ def regrPolinomialpREDICCION(headX, headY, df, datoPred):
     global coefL
     global coefReg
     global pred
-    # print("entre")
-    # print(headX)
-    # print(headY)
-    x = np.asarray(df[headX]).reshape(-1,1)
-    x_data = df[headX]
+
+    # 
+
+
+    # 
+
+    x = np.asarray(df[headX]).reshape(-1, 1)
     y = df[headY]
-    # ||||||||||||||    LINEAL  ||||||||||||||
-    regr = linear_model.LinearRegression()
-    # Entrenando el modelo lin
-    regr.fit(x,y)
 
 
-    # regr = linear_model.LinearRegression()
-    # regr.fit(x,y)
+    # regr = LinearRegression()
+    # regr.fit(x, y)
     # y_pred = regr.predict(x)
-    # plt.scatter(x, y, color='black')
-    # plt.plot(x, y_pred, color='blue', linewidth=3)
-    # # plt.ylim(0,1)
-    # # plt.show()
-    # print("regresion lineal")
-    # # print(regr.coef_)
-    # coefL = regr.coef_
-    # # print("predict ")
-    # # print(regr.predict([[2025]]))
-    # pred = regr.predict([[datoPred]])
-    # # print(pred1)
 
-    # s = io.BytesIO()
+    # """Graficos"""
+
+    # plt.scatter(x, y, color='green')
+    # plt.plot(x, y_pred, color='blue')
+
+    # """Predicciones"""
+    # print(datoPred)
+    # print(regr.predict([[datoPred]]))
+
+
+
+    # --- Regresion Lineal ---
+    pf = PolynomialFeatures(degree = 10)
+    x_trans = pf.fit_transform(x)
+
+    regr = LinearRegression()
+    regr.fit(x_trans, y)
+
+    y_pred = regr.predict(x_trans)
+    # pred = regr.predict([[datoPred]])
+    rmse = np.sqrt(mean_squared_error(y, y_pred))
+    r2 = r2_score(y, y_pred)
+
+    coefL = regr.coef_
+
+    plt.scatter(x, y, color='green')
+    plt.plot(x, y_pred, color='blue')
+    # plt.show()
+    # plt.savefig()
+
+
+
+    s = io.BytesIO()
+    figure = plt.gcf()
+    figure.set_size_inches (8, 6)
+    plt.savefig(s, format='png', bbox_inches="tight")
+    plt.close()
+    s = base64.b64encode(s.getvalue()).decode("utf-8").replace("\n", "")
+    image64 ="data:image/png;base64," + s
+    # print(image64)
+
     
-    # plt.savefig(s, format='png', bbox_inches="tight")
-    # plt.close()
-    # s = base64.b64encode(s.getvalue()).decode("utf-8").replace("\n", "")
-    # image64 ="data:image/png;base64," + s
 
 
 
