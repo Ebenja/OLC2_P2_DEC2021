@@ -152,13 +152,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Times-Roman'
   },
+  t1: {
+    fontSize: 12,
+    textAlign: 'jutify',
+    marginHorizontal: 90,
+    marginRight: 90,
+    paddingBottom: 15,
+    fontFamily: 'Times-Roman',
+    
+  },
   author: {
     fontSize: 12,
     textAlign: 'center',
     paddingHorizontal: 90,
     paddingBottom: 5,
-    fontFamily: 'Times-Roman'
+    fontFamily: 'Times-Roman',
+    
   },
+  h1: {
+    fontSize: 13,
+    textAlign: 'center',
+    paddingHorizontal: 90,
+    paddingBottom: 5,
+    fontFamily: 'Times-Roman',
+    fontWeight: 'bolder'
+  },
+
 
   subtitle: {
     fontSize: 8,
@@ -166,7 +185,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Times-Roman'
   },
   text: {
-    margin: 12,
+    margin: 10,
     fontSize: 10,
     textAlign: 'justify',
     fontFamily: 'Times-Roman',
@@ -177,7 +196,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 100,
   },
   header: {
-    fontSize: 12,
+    fontSize: 10,
     marginBottom: 4,
     textAlign: 'center',
     color: 'grey',
@@ -853,8 +872,9 @@ const styles = StyleSheet.create({
                         <Text style={styles.title}>{`${repActual}.${repActualTitle}`}</Text>
                         <Text style={styles.author}>201504530 - Erick Benjamin Lopez Xajil</Text>
                         <Text style={styles.subtitle}>USAC Facultad Ingenieria - OLC2</Text>
-                        <Text style={styles.author}  >Python es conocido como el lenguaje que logra dominar todas las estadísticas,
-                         relacionadas con la minería de datos e incluso el aprendizaje automático,
+                        <Text style={styles.t1}  >
+                          Python es conocido como el lenguaje que logra dominar todas las estadísticas,
+                          relacionadas con la minería de datos e incluso el aprendizaje automático,
                           es software libre, por lo que muchas personas han podido usarlo para desarrollar 
                           sus soluciones dando un lugar que ha Bibliotecas muy interesantes donde se pueden 
                           encontrar casi todas las técnicas de machine learning que existen actualmente, por 
@@ -864,11 +884,18 @@ const styles = StyleSheet.create({
                           <View style="container">
                             <View style={[styles.row, { height: 700 }]}>
                               <View style={styles.left}>
-                                <Text style={styles.title}>Buenasss</Text>
-
+                                <Text style={styles.h1}><b>I. Objetivos</b></Text>
+                                <Text style={styles.text}  >Python es conocido como el lenguaje que logra dominar todas las estadísticas,
+                                relacionadas con la minería de datos e incluso el aprendizaje automático,
+                                  es software libre, por lo que muchas personas han podido usarlo para desarrollar 
+                                  sus soluciones dando un lugar que ha Bibliotecas muy interesantes donde se pueden 
+                                  encontrar casi todas las técnicas de machine learning que existen actualmente, por 
+                                  supuesto, tiene su parte negativa, y es que derivada del hecho de que muchas personas 
+                                  han aportado, tiene su sintaxis específica para cada caso, lo que hace aprendizaje 
+                                  un poco complejo.</Text>
                               </View>
                               <View style={styles.right}>
-                                <Text style={styles.title}>Buenasssssssssssssssss</Text>
+                                <Text style={styles.h1}>Buenasssssssssssssssss</Text>
                               </View>
                             </View>
                           
