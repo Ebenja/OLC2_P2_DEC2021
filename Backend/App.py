@@ -55,6 +55,7 @@ def rep1():
     search=request.form['search']
 
     df = pd.read_csv(fileCsv)
+    df.fillna(0)
     df.info
     print("Es Fecha")
     print(isDateX)
@@ -71,9 +72,7 @@ def rep1():
             # df[headX] = df[headX].index.map(pd.Timestamp.toordinal)
             # df[headX] = df[headX].index.map(pd.Timestamp.toordinal)
 
-        if (int(repActual )== 1 or int(repActual )== 7 or int(repActual )== 9 or int(repActual )== 15 ):
-        
-            regrPolinomial(headX, headY,df)
+        print(int(repActual))
 
         if (int(repActual )== 2 or int(repActual )== 4 or int(repActual )== 5 or int(repActual )== 8 or int(repActual )== 19 or int(repActual )== 21 or int(repActual )== 25  ):
             print("isdatePredict")
@@ -113,10 +112,14 @@ def rep1():
                 # regrPolinomialpREDICCION(headX, headY,df,fechaaa.toordinal())
             # if predictIsDate == "false":
             #     regrPolinomialpREDICCION(headX, headY,df,predict)
+        if (int(repActual )== 1 or int(repActual )== 7 or int(repActual )== 9 or int(repActual )== 15 or int(repActual )== 3 or int(repActual )== 6 or int(repActual )== 7 or int(repActual )== 15   ):
+        
+            regrPolinomial(headX, headY,df)
 
         print(coefL)
         print(r2)
         print(rmse)
+        print(pred)
         # print(coefL)
 
         # res = {
@@ -125,13 +128,16 @@ def rep1():
         #     "r2": json.dumps(r2),
         #     "coefL": json.dumps(coefL)
         # }
+        if(isinstance(pred, list)):
+            pred.tolist()
+
         res = {
             'resultStatus': 'SUCCESS',
             "image64": json.dumps(image64),
             "rmse": json.dumps(rmse),
             "r2": json.dumps(r2),
             "coefL": json.dumps(coefL.tolist()),
-            "pred": json.dumps(pred.tolist()),
+            "pred": json.dumps(pred),
         }
         # print(res)
         # return jsonify(res)

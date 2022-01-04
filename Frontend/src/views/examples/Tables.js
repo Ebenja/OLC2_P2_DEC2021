@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
 
 
 		fetch(
-			'http://34.125.141.146:5000/rep1',
+			'http://localhost:5000/rep1',
 			{
 				method: 'POST',
 				body: formData,
