@@ -51,6 +51,7 @@ const Tables = () => {
   const [repActualTitle, setrepActualTitle] = useState("");
   const [descRepActual, setdescRepActual] = useState("");
   const [instrRepActual, setinstrRepActual] = useState("");
+  const [currentConcl, setcurrentConcl] = useState("");
   const [imageActual, setimageActual] = useState("");
   // let imageActual; 
 
@@ -171,7 +172,7 @@ const [concReport, setconcReport] = useState([
   {id: 22, reportDesc:"1.  \n2. "},
   {id: 23, reportDesc:"1.  \n2. "},
   {id: 24, reportDesc:"1.  \n2. "},
-  {id: 25, reportDesc:"1.  \n2. "},
+  {id: 25, reportDesc:"Se seleccionan el numero de Casos Confirmados por dia, asi como el dato a predecir para obtenerlo en el area de resultados, y gracias a eso determinamos que la prediccion para este reporte es la siguiente:"},
 ])
 
 const styles = StyleSheet.create({
@@ -547,6 +548,14 @@ const styles = StyleSheet.create({
       }
     });
 
+    concReport.forEach((rep)=>{
+      // console.log("value: ",  e.target.value, " rep.id:", rep.id);
+      if (rep.id == e.target.value)
+      {
+        setcurrentConcl(rep.reportDesc);
+      }
+    });
+
     console.log(typeof(e.target.value));
 
     if (e.target.value=="1" || e.target.value=="7" || e.target.value=="9" || e.target.value=="15" )
@@ -593,6 +602,10 @@ const styles = StyleSheet.create({
       {`ERROR: ${rmse} R2: ${r2}`}
       {headY}
      </Text>)
+  }
+  function getcONSLUSIONPdf(){
+    // return(<h2 className="display-2 text-white mb-0">{`ERROR: ${rmse} R2: ${r2}`}</h2>)
+    return(<div></div>)
   }
   function getDatosPdf(){
     let data= JSON.parse(localStorage.getItem('currentData'))
@@ -1123,6 +1136,21 @@ const styles = StyleSheet.create({
                                 </Text>
                               </View>
                             </View>
+                            <Text style={styles.h1}>V. CONCLUSIONES</Text>
+                            <Text style={styles.text}> 
+                              {currentConcl}
+                            </Text>
+                            {imagenRep1.pred.length > 0?
+                              <Text style={styles.h2}> 
+                                PREDICCION : 
+                                {imagenRep1.pred}
+                              </Text>
+                            :
+                              <Text style={styles.h2}> 
+                              </Text>
+                            }
+                              
+                            
                             
                           </View>
                           

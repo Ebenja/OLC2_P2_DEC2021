@@ -19,6 +19,9 @@ image64 = io.BytesIO()
 coefL = 0
 coefReg = 0
 pred = 0
+fecha2o =[]
+
+fechaOriginal = []
 app = Flask(__name__)
 CORS (app) # Comment on deploy
 # CORS(app, resources={r"/*": {"origins": "*"}})
@@ -39,6 +42,8 @@ def rep1():
     global r2
     global coefL
     global pred
+    global fechaOriginal
+    global fecha2o
     fileCsv = None
     repActual=request.form['repActual'] #id
     fileCsv = request.files['fileCsv']
@@ -60,7 +65,7 @@ def rep1():
     print("Es Fecha")
     print(isDateX)
     fechaOriginal = []
-    fechaO = []
+    fecha2o = []
     
     try:
         if (  not (len(headFilter) == 0  and len(search)==0)  ):
@@ -70,10 +75,12 @@ def rep1():
         
         if ( isDateX =="true" ):
             print("ES Fecha X")
-            print(headX)
+            # print(headX)
+            buenas = df[headX] 
             df[headX] = pd.DatetimeIndex(df[headX])
-            # fechaO = pd.DatetimeIndex(df[headX])
-            # fechaOriginal = df[headX].astype('category').cat.codes
+            # fechaOriginal = df[headX]
+            fecha2o = buenas.astype('category').cat.codes
+            # print(fecha2o)
 
         print(int(repActual))
 
@@ -133,6 +140,7 @@ def rep1():
         print(coefL)
         print(r2)
         print(rmse)
+        print(type(pred))
         print(pred)
         # print(coefL)
 
@@ -142,8 +150,11 @@ def rep1():
         #     "r2": json.dumps(r2),
         #     "coefL": json.dumps(coefL)
         # }
-        if(isinstance(pred, list)):
-            pred.tolist()
+        
+        # print(pred)
+        # if(isinstance(pred, np.ndarray)):
+        #     print("entreeeeeeeeeeee")
+        #     pred.tolist()
 
         res = {
             'resultStatus': 'SUCCESS',
@@ -184,8 +195,8 @@ def regrPolinomial(headX, headY, df):
 
     coefL = regr.coef_
 
-    plt.scatter(x, y, color='green')
-    plt.plot(x, y_pred, color='blue')
+    plt.scatter(df[headX], y, color='green')
+    plt.plot(df[headX], y_pred, color='blue')
     # plt.show()
     # plt.savefig()
 
@@ -207,30 +218,47 @@ def regrPolinomialpREDICCION(headX, headY, df, datoPred):
     global coefL
     global coefReg
     global pred
+    global fecha2o
 
     # 
 
 
     # 
 
-    x = np.asarray(df[headX]).reshape(-1, 1)
-    y = df[headY]
+    
+    y1 = df[headY]
+    
+    x1 = np.asarray(fecha2o).reshape(-1, 1)
+    
+    regr1 = LinearRegression()
+    
+    regr1.fit(x1, y1)
+    print("entreee")
+    # print(pd.astype('category').cat.codes())
+    # print(datetime.strptime(datoPred, '%d/%m/%Y').astype(int))
+    y3 = df.iloc[:, -1].values
+    print(y3)
 
+    # fecha_dt = datetime.strptime(datoPred, '%d/%m/%Y')
+    # fecha_reci = fecha_dt.toordinal() 
+    # print(fecha_reci)
 
-    # regr = LinearRegression()
-    # regr.fit(x, y)
-    # y_pred = regr.predict(x)
+    # pred = regr1.predict([[y3[-1]+int(datoPred)]])
+    pred = regr1.predict([[len(y3)+int(datoPred)]])
+    pred =  pred.tolist()
+    print("sali")
+    """Graficos"""
 
-    # """Graficos"""
-
-    # plt.scatter(x, y, color='green')
+    # plt.scatter(, y, color='green')
     # plt.plot(x, y_pred, color='blue')
 
-    # """Predicciones"""
+    """Predicciones"""
     # print(datoPred)
-    # print(regr.predict([[datoPred]]))
-
-
+    # var1 = pd.DatetimeIndex(datoPred)
+    # print(var1)
+    # pred = regr1.predict(var1)
+    x = np.asarray(df[headX]).reshape(-1, 1)
+    y = df[headY]
 
     # --- Regresion Lineal ---
     pf = PolynomialFeatures(degree = 10)
